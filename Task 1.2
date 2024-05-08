@@ -1,0 +1,70 @@
+API_KEY = 'YOUR_API_KEY'
+!pip install -q sec-api
+from sec_api import ExtractorApi
+extractorApi = ExtractorApi(API_KEY)
+filing_10_k_url = '[^1^][1]'
+extracted_text = extractorApi.get_section(filing_10_k_url, 'item1', 'text')
+pprint(extracted_text)
+
+import os
+from sec_edgar_downloader import Downloader
+import requests
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud
+
+# Function to download 10-K filings
+def download_10k_filings(ticker, start_year, end_year):
+    dl = Downloader()
+    for year in range(start_year, end_year + 1):
+        try:
+            dl.get("10-K", ticker, year)
+            print(f"Downloaded {ticker} 10-K filing for {year}")
+        except Exception as e:
+            print(f"Error downloading {ticker} 10-K filing for {year}: {e}")
+
+# Function to fetch data using LLM inference API
+def fetch_llm_data(company_name):
+    # Example API endpoint (replace with actual API endpoint)
+    api_endpoint = f'https://llm-inference-api.com/?company={company_name}&task=text_analysis'
+    response = requests.get(api_endpoint)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return None
+
+# Function to generate insights from data
+def generate_insights(llm_data):
+    # Example insight: Counting the occurrences of specific keywords
+    keyword_count = {
+        'innovation': llm_data['text'].count('innovation'),
+        'technology': llm_data['text'].count('technology'),
+        'growth': llm_data['text'].count('growth')
+    }
+    return keyword_count
+
+# Function to construct a word cloud visualization
+def construct_word_cloud(data):
+    wordcloud = WordCloud(width=800, height=400, background_color='white').generate_from_frequencies(data)
+    plt.figure(figsize=(10, 5))
+    plt.imshow(wordcloud, interpolation='bilinear')
+    plt.axis('off')
+    plt.show()
+
+# Main function to orchestrate the process
+def main(ticker, start_year, end_year, company_name):
+    download_10k_filings(ticker, start_year, end_year)
+    llm_data = fetch_llm_data(company_name)
+    if llm_data:
+        insights = generate_insights(llm_data)
+        print("Generated Insights:", insights)
+        construct_word_cloud(insights)
+    else:
+        print("Failed to fetch data from LLM API.")
+
+# Example usage
+if __name__ == "__main__":
+    ticker = "AAPL"  # Example ticker (Apple Inc.)
+    start_year = 1995
+    end_year = 2023
+    company_name = "Apple"  # Example company name
+    main(ticker, start_year, end_year, company_name)
