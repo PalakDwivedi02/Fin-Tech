@@ -1,0 +1,18 @@
+pip install -U sec-edgar-downloader
+from sec_edgar_downloader import Downloader
+dl = Downloader("Microsoft","Apple","Amazon", "dwivedipalak1002@gmail.com")
+dl.get("10-K", "MSFT")
+dl.get("10-K", "MSFT", limit=1)
+dl.get("10-K", "MSFT", download_details=False)
+dl.get("10-K", "AAPL")
+dl.get("10-K", "AAPL", limit=1)
+dl.get("10-K", "AAPL", download_details=False)
+dl.get("10-K", "AMZN")
+dl.get("10-K", "AMZN", limit=1)
+dl.get("10-K", "AMZN", download_details=False)
+for filing_type in dl.supported_filings:
+    dl.get(filing_type, "MSFT", limit=1)
+for filing_type in dl.supported_filings:
+    dl.get(filing_type, "AMZN", limit=1)
+for filing_type in dl.supported_filings:
+    dl.get(filing_type, "AAPL", limit=1)
