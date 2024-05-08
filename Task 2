@@ -1,0 +1,52 @@
+from flask import Flask, render_template, request
+import requests
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud
+
+app = Flask(Task 1.2)
+
+# Function to fetch data using LLM inference API
+def fetch_llm_data(company_name):
+    # Example API endpoint (replace with actual API endpoint)
+    api_endpoint = f'https://llm-inference-api.com/?company={company_name}&task=text_analysis'
+    response = requests.get(api_endpoint)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return None
+
+# Function to generate insights from data
+def generate_insights(llm_data):
+    # Example insight: Counting the occurrences of specific keywords
+    keyword_count = {
+        'innovation': llm_data['text'].count('innovation'),
+        'technology': llm_data['text'].count('technology'),
+        'growth': llm_data['text'].count('growth')
+    }
+    return keyword_count
+
+# Function to construct a word cloud visualization
+def construct_word_cloud(data):
+    wordcloud = WordCloud(width=800, height=400, background_color='white').generate_from_frequencies(data)
+    plt.figure(figsize=(10, 5))
+    plt.imshow(wordcloud, interpolation='bilinear')
+    plt.axis('off')
+    plt.savefig('static/wordcloud.png')  # Save word cloud image
+    plt.close()
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':
+        ticker = request.form['ticker']
+        company_name = request.form['company_name']
+        llm_data = fetch_llm_data(company_name)
+        if llm_data:
+            insights = generate_insights(llm_data)
+            construct_word_cloud(insights)
+            return render_template('index.html', ticker=ticker, company_name=company_name)
+        else:
+            return render_template('index.html', error='Failed to fetch data from LLM API.')
+    return render_template('index.html')
+
+if __name__ == '__main__':
+    app.run(debug=True)
